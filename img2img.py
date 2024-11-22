@@ -12,7 +12,7 @@ def get_args():
     parser = argparse.ArgumentParser("Image to ASCII")
     parser.add_argument("--input", type=str, default="data/input.jpg", help="Path to input image")
     parser.add_argument("--output", type=str, default="data/output.jpg", help="Path to output text file")
-    parser.add_argument("--language", type=str, default="english")
+    parser.add_argument("--language", type=str, default="chinese")
     parser.add_argument("--mode", type=str, default="standard")
     parser.add_argument("--background", type=str, default="black", choices=["black", "white"],
                         help="background's color")
@@ -41,7 +41,9 @@ def main(opt):
         cell_height = 12
         num_cols = int(width / cell_width)
         num_rows = int(height / cell_height)
-    char_width, char_height = font.getsize(sample_character)
+    char_bbox = font.getbbox(sample_character)
+    char_width = char_bbox[2] - char_bbox[0]
+    char_height = char_bbox[3] - char_bbox[1]
     out_width = char_width * num_cols
     out_height = scale * char_height * num_rows
     out_image = Image.new("L", (out_width, out_height), bg_code)
