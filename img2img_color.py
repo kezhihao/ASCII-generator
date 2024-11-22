@@ -11,16 +11,33 @@ from utils import get_data
 
 def get_args():
     parser = argparse.ArgumentParser("Image to ASCII")
-    parser.add_argument("--input", type=str, default="data/input.jpg", help="Path to input image")
-    parser.add_argument("--output", type=str, default="data/output.jpg", help="Path to output text file")
-    parser.add_argument("--language", type=str, default="english")
+    parser.add_argument("--input", type=str, default="data/input_tingyu1.jpg", help="Path to input image")
+    parser.add_argument("--output", type=str, default="data/output_tingyu_color1.jpg", help="Path to output text file")
+    parser.add_argument("--language", type=str, default="chinese")
     parser.add_argument("--mode", type=str, default="standard")
     parser.add_argument("--background", type=str, default="black", choices=["black", "white"],
                         help="background's color")
     parser.add_argument("--num_cols", type=int, default=300, help="number of character for output's width")
     parser.add_argument("--scale", type=int, default=2, help="upsize output")
+    parser.add_argument("--saturation", type=float, default=1.5, help="saturation enhancement factor")
+    parser.add_argument("--brightness", type=float, default=1.5, help="brightness enhancement factor")
     args = parser.parse_args()
     return args
+
+
+def enhance_color(color, saturation_factor, brightness_factor):
+    # 确保颜色值在0-255范围内
+    color = tuple(np.clip(c, 0, 255) for c in color)
+    # 将RGB转换为numpy数组
+    color_array = np.array([[color]], dtype=np.uint8)
+    # 转换到HSV色彩空间
+    hsv = cv2.cvtColor(color_array, cv2.COLOR_RGB2HSV)
+    # 增强饱和度和亮度
+    hsv[0,0,1] = np.clip(hsv[0,0,1] * saturation_factor, 0, 255)  # 饱和度
+    hsv[0,0,2] = np.clip(hsv[0,0,2] * brightness_factor, 0, 255)  # 亮度
+    # 转回RGB
+    enhanced = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+    return tuple(enhanced[0,0])
 
 
 def main(opt):
@@ -43,7 +60,9 @@ def main(opt):
         cell_height = 12
         num_cols = int(width / cell_width)
         num_rows = int(height / cell_height)
-    char_width, char_height = font.getsize(sample_character)
+    char_bbox = font.getbbox(sample_character)
+    char_width = char_bbox[2] - char_bbox[0]
+    char_height = char_bbox[3] - char_bbox[1]
     out_width = char_width * num_cols
     out_height = scale * char_height * num_rows
     out_image = Image.new("RGB", (out_width, out_height), bg_code)
@@ -53,7 +72,10 @@ def main(opt):
             partial_image = image[int(i * cell_height):min(int((i + 1) * cell_height), height),
                             int(j * cell_width):min(int((j + 1) * cell_width), width), :]
             partial_avg_color = np.sum(np.sum(partial_image, axis=0), axis=0) / (cell_height * cell_width)
+            # 确保颜色值在0-255范围内
+            partial_avg_color = np.clip(partial_avg_color, 0, 255)
             partial_avg_color = tuple(partial_avg_color.astype(np.int32).tolist())
+            partial_avg_color = enhance_color(partial_avg_color, opt.saturation, opt.brightness)
             char = char_list[min(int(np.mean(partial_image) * num_chars / 255), num_chars - 1)]
             draw.text((j * char_width, i * char_height), char, fill=partial_avg_color, font=font)
 

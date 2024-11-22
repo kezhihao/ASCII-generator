@@ -5,6 +5,8 @@ GENERAL = {
 # Full list could be found here https://github.com/tsroten/zhon/tree/develop/zhon/cedict
 CHINESE = {
     "standard": "张婷玉生日快乐！婷玉、玉酱、玉玉、小玉玉、喜欢、月色真美啊",
+    #"standard": "龘䶑瀰幗獼鑭躙䵹觿䲔釅欄鐮䥯鶒獭鰽襽螻鰱蹦屭繩圇婹歜剛屧磕媿慪像僭堳噞呱棒偁呣塙唑浠唼刻凌咄亟拮俗参坒估这聿布允仫忖玗甴木亪女去凸五圹亐囗弌九人亏产斗丩艹刂彳丬了５丄三亻讠厂丆丨１二宀冖乛一丶、",
+
 }
 
 KOREAN = {
